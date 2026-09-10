@@ -14,8 +14,7 @@ suppliers, tax and reporting.
 
 ## Screenshots
 
-**Point of sale** — a basket mixing English and Sinhala products, tax disclosed on the total,
-keyboard shortcuts for a busy counter.
+**Point of sale** — a retail checkout screen with product search, discounts, tax and multiple payment options.
 
 ![Point of sale](docs/screenshots/pos.png)
 
@@ -35,7 +34,7 @@ keyboard shortcuts for a busy counter.
 |---|---|
 | ![Products](docs/screenshots/products.png) | ![Roles and permissions](docs/screenshots/roles-permissions.png) |
 
-*From a demonstration shop populated with generated data. More in
+*Captured from a demonstration shop populated with generated data. More in
 [docs/screenshots/](docs/screenshots/).*
 
 ---
@@ -43,7 +42,7 @@ keyboard shortcuts for a busy counter.
 ## Overview
 
 Most small retailers here run on paper, spreadsheets, or offline software locked to one machine,
-and the alternatives are priced for businesses ten times their size. Awaken POS is a browser-based
+and the alternatives are priced for businesses many times their size. Awaken POS is a browser-based
 system a shop opens on a desktop till, a tablet or a phone.
 
 **Who it is for:** independent shops and small chains — an owner plus a handful of staff, often on
@@ -64,7 +63,7 @@ receipt numbering; duplicate-submission protection; void with separate authorisa
 intake recorded as auditable imports; adjustments, history, low-stock and expiry reporting.
 
 **Money** — customer credit and payment allocation; supplier payables; tax classification with
-inheritance; ten reports across sales, cost, profit, stock valuation and tax; CSV exports.
+inheritance; eleven reports across sales, cost, profit, stock valuation and tax; CSV exports.
 
 **Control** — shop-defined roles with a seniority ordering; per-feature permissions enforced in the
 request pipeline; append-only sales with void as the only correction; activity and admin audit logs.
@@ -201,16 +200,15 @@ ongoing development.
 
 ## My Role
 
-I am the primary and sole developer of Awaken POS. Working independently, I handled the
-architecture, implementation, testing, debugging, third-party integrations, and deployment and
-operations.
+I am the sole developer of Awaken POS. Working independently, I handled the architecture,
+implementation, testing, debugging, third-party integrations, and deployment and operations.
 
 I use AI coding tools extensively as part of my development workflow, while personally making the
 architectural decisions, reviewing the output, testing it and taking responsibility for what ships.
 
 I am an early-career developer — I have not worked on a team of engineers or operated at large
 scale. What I have done is take a real business problem from nothing to a deployed system a
-business relies on, and keep it running: learning first-hand what breaks under concurrent load,
+business relies on, and keep developing it: learning first-hand what breaks under concurrent load,
 what an unverified backup is worth, and why a test suite can pass for the wrong reason.
 
 ---
