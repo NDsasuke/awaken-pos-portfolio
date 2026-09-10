@@ -14,15 +14,20 @@ day somebody forgets the filter, and the failure mode is one business seeing ano
 
 This system separates tenancy at the database boundary instead.
 
-```
-        master database                         shop databases
-  +---------------------------+      +-------------------------------+
-  |  Shops        Users       |      |  Products      Sales          |
-  |  Roles        Plans       |  X   |  Stock         Customers      |
-  |  Access       Billing     | ---> |  Suppliers     Quotations     |
-  |                           |      |  Activity logs                |
-  +---------------------------+      +-------------------------------+
-                       no query joins across this line
+```mermaid
+flowchart LR
+    subgraph M["Master database"]
+        M1["Shops · Users"]
+        M2["Roles · Plans"]
+        M3["Access · Billing"]
+    end
+    subgraph S["Shop databases"]
+        S1["Products · Sales"]
+        S2["Stock · Customers"]
+        S3["Suppliers · Quotations"]
+        S4["Activity logs"]
+    end
+    M -. "no query joins across this boundary" .-> S
 ```
 
 - **Master** holds what is shared across the platform: shop records, user accounts, roles,

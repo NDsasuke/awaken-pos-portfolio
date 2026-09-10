@@ -1,27 +1,23 @@
 # Screenshots
 
-Screenshots of the live product are not yet published here.
+Captured from a **demonstration shop populated with generated data** — no real business, customer
+or staff information appears in any image. Browser chrome is cropped out.
 
-When added, they will be placed in this directory and referenced from the main README. Any
-screenshot published must be taken against **demonstration data only** — never a real shop's
-catalogue, customers, sales or staff names.
-
-## Planned
-
-| File | Screen | Caption |
+| File | Screen | What it shows |
 |---|---|---|
-| `pos.png` | Point of sale | The till: product search, cart, and payment |
-| `dashboard.png` | Shop dashboard | Takings, activity and stock alerts at a glance |
-| `products.png` | Product management | Catalogue with categories and tax classification |
-| `stock.png` | Stock intake | Costed batches with purchase and expiry dates |
-| `reports.png` | Reporting | Profit reporting derived from actual batch costs |
-| `sinhala.png` | Sinhala interface | The same screens in the shop's own language |
-| `roles.png` | Roles and permissions | Per-feature access control for shop staff |
+| `pos.png` | Point of sale | A basket mixing English and Sinhala products, tax disclosed on the total, payment methods, and the keyboard shortcuts a counter operator uses |
+| `dashboard.png` | Shop dashboard | Takings, profit and low-stock at a glance, with yearly revenue and catalogue totals |
+| `sinhala-ui.png` | Sinhala interface | The same dashboard in Sinhala — system text translated, shop-authored names left alone |
+| `products.png` | Product catalogue | Search and filtering, with tax class showing where it is inherited from the category |
+| `inventory.png` | Stock overview | On-hand quantity, open FIFO batches and stock value per product |
+| `reports.png` | Stock valuation | FIFO inventory value from remaining batch quantities and cost price, with CSV export |
+| `roles-permissions.png` | Roles and permissions | Shop-defined roles with a seniority level and per-feature permission counts |
 
-## Checklist before publishing any screenshot
+## Before adding or replacing a screenshot
 
 - [ ] Demonstration data only — no real business, customer or staff information
 - [ ] No email addresses, phone numbers or physical addresses
-- [ ] No internal hostnames, IP addresses or environment identifiers visible in the browser bar
+- [ ] No hostnames, IP addresses or environment identifiers visible
+- [ ] Browser chrome cropped — URL bar and bookmarks must not appear
 - [ ] No session tokens, identifiers or debugging output visible
-- [ ] Nothing in the frame identifying the trialling business
+- [ ] No operating-system or licensing watermarks

@@ -2,113 +2,101 @@
 
 A multi-tenant, cloud-hosted point-of-sale and retail management system for small and mid-sized
 retail shops in Sri Lanka — architected, built, tested and deployed by me as the sole developer.
+It handles a shop's full operational day: selling at the till, costed stock, credit customers,
+suppliers, tax and reporting.
 
-**Live product:** [pos.awakendev.com](https://pos.awakendev.com)
+**Live product → [pos.awakendev.com](https://pos.awakendev.com)**
 
 > **This is a portfolio and documentation repository.** The production application is
-> closed-source. No application code, database schema or infrastructure configuration is
-> published here.
+> closed-source; no source code, database schema or infrastructure configuration is published here.
+
+---
+
+## Screenshots
+
+**Point of sale** — a basket mixing English and Sinhala products, tax disclosed on the total,
+keyboard shortcuts for a busy counter.
+
+![Point of sale](docs/screenshots/pos.png)
+
+| Dashboard | Sinhala interface |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Sinhala interface](docs/screenshots/sinhala-ui.png) |
+
+| Product catalogue | Stock and FIFO batches |
+|---|---|
+| ![Products](docs/screenshots/products.png) | ![Inventory](docs/screenshots/inventory.png) |
+
+| Stock valuation report | Roles and permissions |
+|---|---|
+| ![Reports](docs/screenshots/reports.png) | ![Roles and permissions](docs/screenshots/roles-permissions.png) |
+
+*From a demonstration shop populated with generated data.*
 
 ---
 
 ## Overview
 
-Most small retailers here run on paper, spreadsheets, or offline software locked to a single
-machine. The alternatives are priced for businesses ten times their size. Awaken POS is a
-browser-based system a shop can open on a desktop till, a tablet or a phone.
+Most small retailers here run on paper, spreadsheets, or offline software locked to one machine,
+and the alternatives are priced for businesses ten times their size. Awaken POS is a browser-based
+system a shop opens on a desktop till, a tablet or a phone.
 
-It covers the operational day of a retail shop end to end:
+**Who it is for:** independent shops and small chains — an owner plus a handful of staff, often on
+modest hardware and mobile connections.
 
-- ringing up sales at a till, with barcode scanning and printed receipts
-- tracking stock as costed batches, so reported margin reflects what was actually paid
-- selling on credit and collecting against outstanding balances
-- receiving supplier deliveries and tracking what is owed
-- reporting on sales, cost, profit, tax and stock value
-- controlling what each member of staff can see and do
-
-**Who it is for:** independent retail shops and small chains — typically an owner plus a handful
-of staff, often on modest hardware and mobile connections.
-
-**Built for its market:** LKR currency throughout, an English/Sinhala interface, Sinhala product
-search, and receipts sized for the thermal printers shops here actually buy.
+**Built for its market:** LKR throughout, an English/Sinhala interface, search that matches Sinhala
+and transliterated product names, and receipts sized for the thermal printers shops here buy.
 
 ---
 
 ## Key Features
 
-A full breakdown, including what is partial and what is planned, is in
-**[docs/features.md](docs/features.md)**.
+**Selling** — till with live product search; barcode scanning by hardware scanner, device camera or
+manual entry; discounts and recorded price overrides; cash and credit payment; sequential per-shop
+receipt numbering; duplicate-submission protection; void with separate authorisation; quotations.
 
-**Point of sale** — till screen with live product search; barcode scanning through hardware
-scanners, device camera and manual entry; line and cart discounts with recorded price overrides;
-cash and credit payment; per-shop sequential receipt numbering; duplicate-submission protection;
-void with a separate authorisation step recording both parties.
+**Stock** — costed batches with purchase and expiry dates, consumed oldest-first; CSV and manual
+intake recorded as auditable imports; adjustments, history, low-stock and expiry reporting.
 
-**Catalogue** — products, categories and sub-categories; unit-priced and loose (weight/volume)
-goods; category-driven custom product fields inherited down the category tree; barcode and QR
-label printing; image optimisation on upload; Sinhala and transliterated search.
+**Money** — customer credit and payment allocation; supplier payables; tax classification with
+inheritance; ten reports across sales, cost, profit, stock valuation and tax; CSV exports.
 
-**Inventory** — stock held as costed batches with purchase and expiry dates, consumed
-oldest-first; CSV and manual stock intake recorded as auditable imports; manual stock adjustment;
-stock history, low-stock and expiry reporting; automated consistency checking.
+**Control** — shop-defined roles with a seniority ordering; per-feature permissions enforced in the
+request pipeline; append-only sales with void as the only correction; activity and admin audit logs.
 
-**Customers & suppliers** — credit accounts with outstanding balance tracking and payment
-allocation; supplier records, delivery history and payables.
+**Platform** — subscription plans gating features and staff seats, trials and renewals, PDF
+invoices, and an operator administration area.
 
-**Reporting** — ten implemented reports covering sales, cost, profit, stock valuation, tax and
-business summaries, plus data exports as CSV. Heavier reports run on a background queue.
-
-**Tax** — per-product and per-category classification with inheritance and bulk reclassification;
-tax-inclusive pricing; tax figures frozen onto the sale record so historical documents never move
-when a rate later changes.
-
-**Access control & audit** — shop-defined roles with a seniority ordering; per-feature permissions
-enforced in the request pipeline rather than only hidden in the navigation; delegation bounded by
-what the granting user holds. Completed sales are append-only — a void is the only permitted
-correction, and it is itself recorded.
-
-**Platform** — subscription plans gating features and staff seats, trials and renewals, generated
-PDF invoices, and an operator administration area.
-
-**Security** — session authentication, Google OAuth sign-in, email OTP multi-factor authentication
-for administrator accounts, request rate limiting, a full security header set including a
-nonce-based Content Security Policy, and correct client identification behind a reverse proxy.
-
-**Operations** — scheduled backups with integrity verification and a rehearsed restore procedure,
-a system health check suite, and external monitoring independent of the application host.
-
-**Localisation** — English and Sinhala interfaces, with a deliberate boundary between system text,
-which is translated, and shop-authored content such as product and customer names, which is not.
+→ Full breakdown, including partial and planned work: **[docs/features.md](docs/features.md)**
 
 ---
 
 ## Architecture
 
-Full write-up: **[docs/architecture.md](docs/architecture.md)**.
+Multi-tenancy is enforced at the database boundary rather than by filtering every query.
+Platform-wide records live in a master database; each shop's operational data lives in its own shop
+database, and a request binds to the correct one for its lifetime. Because a query cannot join
+across that boundary, one shop reading another's data is a design-time impossibility rather than a
+runtime risk that depends on remembering a filter.
 
-Multi-tenancy is enforced at the database boundary rather than by query filtering. Platform-wide
-records — shops, user accounts, roles, subscription plans — live in a master database. Each shop's
-operational data — products, sales, stock, customers, activity logs — lives in a separate shop
-database, and a request binds to the correct one for its lifetime.
-
+```mermaid
+flowchart TB
+    A["Client devices — desktop till · tablet · phone"] --> B["Cloudflare"]
+    B --> C["Web tier"]
+    C --> D["Application layer"]
+    D --> E[("Master database<br/>shops · users · roles · plans")]
+    D --> F[("Shop databases<br/>catalogue · sales · stock · customers")]
+    D --> G["Redis — cache and queue"]
+    G --> H["Queue workers and scheduler"]
+    H --> F
+    H --> E
 ```
-        master database                    shop databases
-  +-------------------------+      +---------------------------+
-  |  Shops       Users      |      |  Products    Sales        |
-  |  Roles       Plans      |  X   |  Stock       Customers    |
-  |  Billing     Access     | ---> |  Suppliers   Activity     |
-  +-------------------------+      +---------------------------+
-                    no queries join across this line
-```
 
-Because a query cannot join across that line, one shop reading another shop's data is a
-design-time impossibility rather than a runtime risk that depends on every developer remembering
-a filter. Capacity is added by adding shop databases, without redistributing existing shops.
+A layered pipeline establishes identity, account status, shop membership, database binding,
+subscription validity, per-feature permission and locale before a controller runs. Controllers stay
+thin; work touching money or stock lives in dedicated, individually testable services.
 
-A layered request pipeline establishes identity, account status, shop membership, database
-binding, subscription validity, per-feature permission, locale and response security headers —
-in that order — before a controller runs. Controllers stay thin; work that touches money or stock
-lives in dedicated, individually testable service classes.
+→ **[docs/architecture.md](docs/architecture.md)**
 
 ---
 
@@ -117,179 +105,129 @@ lives in dedicated, individually testable service classes.
 | Layer | Technology |
 |---|---|
 | Language & framework | PHP 8.2, Laravel 12 |
-| Frontend | Server-rendered Blade templates, vanilla JavaScript, custom token-based CSS design system |
+| Frontend | Server-rendered Blade, vanilla JavaScript, token-based CSS system |
 | Build | Vite |
-| Database | MariaDB 11, separated into master and per-shop databases |
+| Database | MariaDB 11, split into master and per-shop databases |
 | Cache & queue | Redis |
-| Web tier | nginx with PHP-FPM and opcache |
-| Containers | Docker and Docker Compose, multi-stage image builds |
+| Web tier | nginx, PHP-FPM, opcache |
+| Containers | Docker, Docker Compose, multi-stage builds |
 | Testing | PHPUnit, Mockery, Faker |
 | Code style | Laravel Pint, enforced in CI |
-| Authentication | Laravel session auth, Google OAuth, email OTP MFA for administrators |
-| Barcode | WebAssembly in-browser camera decoding, plus hardware scanner and manual paths |
-| Documents | Server-side PDF generation |
-| Storage | Local disk and cloud object storage for backups |
+| Auth | Session auth, Google OAuth, email OTP MFA for administrators |
+| Barcode | WebAssembly camera decoding, hardware scanner, manual entry |
 | CI/CD | GitHub Actions |
-| Edge | Cloudflare |
 
-**A deliberate choice: no SPA framework.** The target users are on modest hardware and mobile
-data. A server-rendered application with targeted JavaScript loads faster on those devices, and it
-removes an entire category of client-state bugs from screens that handle money.
+**No SPA framework, deliberately.** Target users are on modest hardware and mobile data; a
+server-rendered app with targeted JavaScript loads faster there and removes a category of
+client-state bugs from screens that handle money.
 
 ---
 
 ## Engineering Highlights
 
-Detail on each: **[docs/engineering.md](docs/engineering.md)**.
+- **Idempotent checkout** — a retried or double-tapped sale resolves to the transaction that already
+  committed, including when two requests race and the database constraint settles it.
+- **Concurrency-safe receipt numbering** — numbers must be unique *and* gapless, since a missing one
+  is indistinguishable from a deleted sale. Atomic allocation bound to the sale's transaction,
+  verified under simulated multi-till load.
+- **Oversell prevention** — stock drawn down under row-level locking inside the sale transaction.
+- **FIFO cost basis** — each sale line records the cost of the batch it consumed, which makes profit
+  reporting real rather than estimated.
+- **Consistent lock ordering** — one documented ordering across every path writing both stock and
+  product records, with a build check that fails if new code reverses it.
+- **Time-zone-aware reporting** — the app runs in UTC while shops trade elsewhere; periods cut at
+  the shop's day boundary, handled centrally and guarded automatically.
+- **Centralised money arithmetic** — rounding in one helper, with a build check preventing
+  hand-rolled copies.
+- **Sinhala and Singlish search** — must match part-way into a name, which rules out full-text
+  indexing; documented so it is not later "optimised" into breaking the till.
+- **Architectural guardrail tests** — checks that scan the codebase and fail the build when a design
+  rule is violated, so decisions survive future changes.
 
-- **Idempotent checkout** — a retried, double-tapped or network-interrupted sale resolves to the
-  transaction that already committed rather than creating a second one, including when two
-  requests race.
-- **Concurrency-safe receipt numbering** — receipt numbers must be unique *and* gapless, because a
-  missing number is indistinguishable from a sale someone deleted. Solved with atomic allocation
-  bound to the sale's own transaction, and verified under simulated multi-till load.
-- **Oversell prevention** — stock is drawn down under row-level locking inside the sale
-  transaction, so two simultaneous sales cannot both pass the same availability check.
-- **FIFO cost basis** — stock is consumed oldest-batch-first and each sale line records the cost it
-  actually consumed, which is what makes profit reporting real rather than estimated.
-- **Consistent lock ordering** — several code paths write the same pair of tables in one
-  transaction; a single ordering rule prevents deadlocks under concurrent use, with an automated
-  check that fails the build if new code takes them in the other order.
-- **Time-zone-aware reporting** — the application runs in UTC while shops trade in a different
-  zone. Reporting periods cut at the shop's day boundary, not the server's, handled in one place
-  and guarded by an automated rule.
-- **Centralised money arithmetic** — rounding lives in a single helper, with a build-time check
-  that prevents hand-rolled copies reappearing.
-- **Sinhala and Singlish search** — product names must match anywhere within a string, which rules
-  out full-text indexing; the pattern-matching approach is documented so it is not later
-  "optimised" into something that breaks the primary market's till.
-- **Architectural guardrail tests** — automated checks that scan the codebase and fail the build
-  when a rule is broken, so design decisions survive future changes instead of eroding.
+→ **[docs/engineering.md](docs/engineering.md)**
 
 ---
 
 ## Testing
 
-Full write-up: **[docs/testing.md](docs/testing.md)**.
+PHPUnit, run in the same container image as the application against dedicated test databases, with
+layered guards making it structurally difficult for a test run to reach real data.
 
-PHPUnit, run inside the same container image as the application against dedicated test databases,
-with layered guards that make it structurally difficult for a test run to touch real data.
+Most recent full run: **1,638 tests, 9,635 assertions, passing**, across 268 test files — covering
+financial correctness, security and access control, shop-facing behaviour, and convention tests
+enforcing build-time rules.
 
-Most recent full run: **1,638 tests, 9,635 assertions, passing**, across 268 test files. The
-largest groups cover financial correctness, security and access control, and shop-facing
-behaviour. Alongside those sit architecture and convention tests — build-time rules about money
-handling, time handling, lock ordering and localisation coverage.
+No line-coverage figure is claimed, because none is measured. Two practices worth naming:
+**mutation checking**, deliberately breaking money and access-control code to confirm the test
+fails, since a passing test proves nothing until shown capable of failing; and **load testing**
+under simulated concurrent tills, which surfaced a concurrency defect single-threaded tests could
+not have found.
 
-I do not claim a line-coverage percentage, because I do not measure one.
-
-Two practices worth naming. **Mutation checking:** for anything touching money or access control,
-I deliberately break the code and confirm the test fails — a passing test proves nothing until it
-has been shown capable of failing. **Predicted deltas:** before a full run I predict the exact
-test and assertion change and reconcile against the result, because two totals matching afterwards
-cannot show that an existing test quietly flipped.
-
-The system has also been **load tested** under simulated concurrent tills, which is what surfaced
-a concurrency defect that single-threaded tests structurally could not have found.
+→ **[docs/testing.md](docs/testing.md)**
 
 ---
 
 ## Deployment
 
-Detail: **[docs/deployment.md](docs/deployment.md)**.
+Containerised on a Linux VPS behind Cloudflare, with web tier, application, scheduler and queue
+workers as separate services. Staging and production are isolated, and every change is verified on
+staging first. CI runs code style, a dependency security audit, migrations and the full suite on
+every push. Deployment ends in a health check and a transactional smoke test, so a green deploy
+means more than "the container started". Scheduled health checks, external monitoring independent
+of the application host, and integrity-verified backups with a rehearsed restore procedure.
 
-The application is containerised and deployed to a Linux VPS behind Cloudflare, with the web tier,
-application, scheduler and queue workers running as separate services.
+Infrastructure identifiers, hostnames and configuration are deliberately not published.
 
-- **Separate staging and production environments.** Every change is verified on staging first.
-- **CI on every push** — code style, dependency security advisories, database migrations and the
-  full test suite.
-- **Automated deployment**, ending in a health check and a transactional smoke test, so a green
-  deploy means more than "the container started".
-- **Monitoring** — scheduled health checks, external uptime monitoring independent of the
-  application host, and alerting on failure.
-- **Backups** on a schedule, integrity-verified, with a documented and rehearsed restore procedure.
-
-Infrastructure identifiers, hostnames, credentials and environment configuration are deliberately
-not published.
+→ **[docs/deployment.md](docs/deployment.md)**
 
 ---
 
 ## Current Status
 
-**The product is live and currently being trialled by a real business**, alongside a separate
-staging environment used to verify every change before release. It is actively maintained, with
-ongoing feature and defect work.
+**The product is live and currently being trialled by a real business. It is actively maintained
+and developed**, alongside a separate staging environment used to verify every change before
+release.
 
-The system is built for a deliberately modest initial scale, with a data architecture that allows
-growth without re-architecting. I have chosen not to build for scale that does not exist yet.
-
-Known defects are tracked in a maintained internal register with severities and an agreed fix
-order, and that register is where work comes from. I consider an honest list of known-but-unfixed
-issues to be a sign of a maintained system rather than something to hide.
+It is built for a deliberately modest initial scale, with a data architecture that allows growth
+without re-architecting. Known issues and planned improvements are tracked internally as part of
+ongoing development.
 
 ---
 
 ## My Role
 
-I am the primary and sole developer of Awaken POS. Working independently, I was responsible for
-the architecture, the full implementation, the test suite, debugging, third-party integration, and
-deployment and operations.
+I am the primary and sole developer of Awaken POS. Working independently, I handled the
+architecture, implementation, testing, debugging, third-party integrations, and deployment and
+operations.
 
-I use AI coding tools extensively as part of my development workflow. I direct the work, make the
-architectural and product decisions, and personally review, test and integrate what those tools
-produce. I take responsibility for the software that ships.
+I use AI coding tools extensively as part of my development workflow, while personally making the
+architectural decisions, reviewing the output, testing it and taking responsibility for what ships.
 
-Honestly stated: I am an early-career developer. I have not worked on a team of engineers, and I
-have not operated at large scale. What I have done is take a real business problem from nothing to
-a working, deployed system that a business relies on day to day — and keep it running, including
-learning first-hand what breaks under concurrent load, what an unverified backup is actually
-worth, and why a test suite can be green for the wrong reason.
-
----
-
-## Screenshots
-
-Screenshots are not yet published. Placeholders and intended captions are listed in
-[docs/screenshots/](docs/screenshots/).
-
-| Screen | Status |
-|---|---|
-| Point of sale | Pending |
-| Dashboard | Pending |
-| Product management | Pending |
-| Stock batches and intake | Pending |
-| Reports | Pending |
-| Sinhala interface | Pending |
-| Roles and permissions | Pending |
-
-A guided walkthrough of the live system can be arranged on request.
+I am an early-career developer — I have not worked on a team of engineers or operated at large
+scale. What I have done is take a real business problem from nothing to a deployed system a
+business relies on, and keep it running: learning first-hand what breaks under concurrent load,
+what an unverified backup is worth, and why a test suite can pass for the wrong reason.
 
 ---
 
 ## Why I Built It
 
-I started this because the shops I know were running on paper and spreadsheets, and an owner who
-wants to know last month's actual profit should not have to reconstruct it by hand.
-
-What I wanted to prove to myself was that I could build the whole thing — not a demo or a tutorial
-project, but a system that takes money, holds a business's records, and has to be right every
-time, because a real shop depends on it. That meant learning things a tutorial does not cover:
-that a race condition presents as a flaky till, that a backup nobody has restored is a guess, that
-a passing test can pass for the wrong reason, and that the hard part of a feature is usually the
-case you did not think of.
-
-The product is live, and I am still learning on it.
+The shops I know were running on paper and spreadsheets, and an owner who wants last month's actual
+profit should not have to reconstruct it by hand. I wanted to prove to myself I could build the
+whole thing — not a demo, but a system that takes money, holds a business's records and has to be
+right every time. That meant learning what a tutorial does not cover: that a race condition
+presents as a flaky till, that a backup nobody has restored is a guess, and that the hard part of a
+feature is usually the case you did not think of.
 
 ---
 
 ## Contact
 
-**Nishal Dilanga Ranasinghe** — [GitHub](https://github.com/NDsasuke)
+**Nishal Dilanga Ranasinghe** — [github.com/NDsasuke](https://github.com/NDsasuke)
 
 Open to software engineering roles and freelance work. Happy to walk through the architecture, the
-engineering decisions, or a live demo of the product.
+engineering decisions, or a live demo.
 
 ---
 
-*This repository contains documentation only. Awaken POS itself is proprietary and its source code
-is not published.*
+*Documentation only. Awaken POS is proprietary and its source code is not published.*
