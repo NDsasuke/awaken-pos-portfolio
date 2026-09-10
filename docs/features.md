@@ -1,6 +1,7 @@
 # Features
 
-An honest breakdown of what exists. Anything not marked otherwise is implemented and in use.
+A current implementation breakdown of Awaken POS. Statuses are marked explicitly where a feature
+is partial or planned.
 
 **Legend:** ✅ Implemented · 🟡 Partially implemented · ⬜ Planned, not built
 
@@ -110,7 +111,7 @@ a shop is never left clicking something that silently does nothing.
 | User deactivation, effective on the next request | ✅ |
 | Retention of users with transaction history, for audit integrity | ✅ |
 | Staff seat limits by subscription plan | ✅ |
-| A distinct role-management permission and delegation seniority cap | ⬜ |
+| Additional role-management permission and delegation controls | ⬜ |
 
 ## Audit
 
