@@ -23,15 +23,20 @@ keyboard shortcuts for a busy counter.
 |---|---|
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Sinhala interface](docs/screenshots/sinhala-ui.png) |
 
-| Product catalogue | Stock and FIFO batches |
+| Inventory intelligence — where cash is locked | Daily sales, hour by hour |
 |---|---|
-| ![Products](docs/screenshots/products.png) | ![Inventory](docs/screenshots/inventory.png) |
+| ![Inventory intelligence](docs/screenshots/inventory-intelligence.png) | ![Daily sales report](docs/screenshots/reports-daily.png) |
 
-| Stock valuation report | Roles and permissions |
+| Stock overview with FIFO batches | Stock intake by file or manual entry |
 |---|---|
-| ![Reports](docs/screenshots/reports.png) | ![Roles and permissions](docs/screenshots/roles-permissions.png) |
+| ![Inventory](docs/screenshots/inventory.png) | ![Stock import](docs/screenshots/stock-import.png) |
 
-*From a demonstration shop populated with generated data.*
+| Product catalogue | Roles and permissions |
+|---|---|
+| ![Products](docs/screenshots/products.png) | ![Roles and permissions](docs/screenshots/roles-permissions.png) |
+
+*From a demonstration shop populated with generated data. More in
+[docs/screenshots/](docs/screenshots/).*
 
 ---
 
